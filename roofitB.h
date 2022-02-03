@@ -78,6 +78,15 @@ Double_t yieldErr;
 
 Double_t FitMean;
 Double_t FitMeanErr; 
+
+Double_t FitWidth1; 
+Double_t FitWidth1Err; 
+
+
+Double_t FitWidth2; 
+Double_t FitWidth2Err; 
+
+
 RooAddPdf* model;
 
 
@@ -553,6 +562,14 @@ RooFitResult *fit(TString variation, TString pdf, TCanvas* c, RooDataSet* ds,  R
 	
 	FitMean = cbmean.getVal();
 	FitMeanErr = cbmean.getError();
+	 
+	FitWidth1 = cbsigma1.getVal();
+	FitWidth1Err = cbsigma1.getError();
+	 
+	FitWidth2 = cbsigma2.getVal();
+	FitWidth2Err = cbsigma2.getError();
+
+
 	
 
 	TH1D* fh = (TH1D*)h->Clone("fh");

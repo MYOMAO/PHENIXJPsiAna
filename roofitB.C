@@ -64,6 +64,8 @@ void roofitB(int Opt)
 
 	TH1D * JPsiYield = new TH1D("JPsiYield","",NBins,MultBinHis);
 	TH1D * JPsiMean = new TH1D("JPsiMean","",NBins,MultBinHis);
+	TH1D * JPsiWidth1 = new TH1D("JPsiWidth1","",NBins,MultBinHis);
+	TH1D * JPsiWidth2 = new TH1D("JPsiWidth2","",NBins,MultBinHis);
 
 
 
@@ -195,10 +197,22 @@ void roofitB(int Opt)
 		JPsiMean->SetBinContent(i+1,FitMean);
 		JPsiMean->SetBinError(i+1,FitMeanErr);
 
+	
+		JPsiWidth1->SetBinContent(i+1,FitWidth1);
+		JPsiWidth1->SetBinError(i+1,FitWidth1Err);
+
+	
+		JPsiWidth2->SetBinContent(i+1,FitWidth2);
+		JPsiWidth2->SetBinError(i+1,FitWidth2Err);
+
+
+
 	}
 
 	JPsiYield->Write();
 	JPsiMean->Write();
+	JPsiWidth1->Write();	
+	JPsiWidth2->Write();
 
 	//outf->Write();
 	outf->Close();

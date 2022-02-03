@@ -122,10 +122,28 @@ void DrawFinal(){
 		c->SaveAs(Form("FinalResults/Parameters/Mean%s.png",OutName[i].Data()));
 
 
-	
+
+		TH1D * JPsiWidth1 = (TH1D *) fin->Get("JPsiWidth1");
+		JPsiWidth1->GetXaxis()->SetTitle(Form("Event Multiplicity: %s",Name[i].Data()));
+		JPsiWidth1->GetYaxis()->SetTitle("J/#psi Width From Fits (GeV/c^{2})");
+		JPsiWidth1->GetXaxis()->CenterTitle();
+		JPsiWidth1->GetYaxis()->CenterTitle();
+		JPsiWidth1->GetYaxis()->SetTitleOffset(1.6);
+
+		JPsiWidth1->SetMarkerStyle(20);
+		JPsiWidth1->SetMarkerSize(1);
+		JPsiWidth1->SetMarkerColor(1);
+		JPsiWidth1->SetLineColor(1);
+		
 
 
 
+		JPsiWidth1->Draw("ep");
+
+		tex_y->Draw();
+//		l->Draw("SAME");
+
+		c->SaveAs(Form("FinalResults/Parameters/Width_%s.png",OutName[i].Data()));	
 	}
 
 	TFile * finData = new TFile("merged_anaT2_run15pp_MU_v14.root");
