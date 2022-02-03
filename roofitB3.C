@@ -9,7 +9,7 @@ int bp_bs = 0u;
 
 //void roofitB(int usePbPb = 0, int fitOnSaved = 0, TString inputmc = "", TString _varExp = "", TString trgselection = "",  TString cut = "", TString cutmcgen = "", int isMC = 0, Double_t luminosity = 1., int doweight = 1, TString collsyst = "", TString outputfile = "", TString outplotf = "", TString npfit = "", int doDataCor = 0, Float_t centmin = 0., Float_t centmax = 100.)
 
-void roofitB(int Opt)
+void roofitB3(int Opt)
 {
 
 
@@ -48,7 +48,7 @@ void roofitB(int Opt)
 	RooDataHist* dh = new RooDataHist();   
 	dh = new RooDataHist("dh","",*mass,Import(*h));
 
-	TFile* outf = new TFile(Form("OutFiles/FitResults_%d.root",Opt),"recreate");
+	TFile* outf = new TFile(Form("OutFiles/FitResults_Inc_%d.root",Opt),"recreate");
 	outf->cd();
 
 	cout << "Pass 3" << endl;
@@ -57,9 +57,9 @@ void roofitB(int Opt)
 	ds = new RooDataSet("ds0","",skimtree_new, RooArgSet(*mass, *y, *Evt_Mult_FVTXN, *Evt_Mult_FVTXS));
 
 
-	const int NBins = 5;
-	int MultBin[NBins + 1] = {0,2,5,8,12,19};
-	double MultBinHis[NBins + 1] = {0,2,5,8,12,19};
+	const int NBins = 1;
+	int MultBin[NBins + 1] = {0,19};
+	double MultBinHis[NBins + 1] = {0,9};
 
 
 	TH1D * JPsiYield = new TH1D("JPsiYield","",NBins,MultBinHis);
@@ -100,7 +100,7 @@ void roofitB(int Opt)
 		RooFitResult* f = fit("", "", c,  ds_cut, dh, mass, frame);
 
 		std::cout << "Now Finall We Validate Our Fits" << std::endl;
-	//	validate_fit(w_val);
+		validate_fit(w_val,Opt);
 		modelcurve = frame->getCurve(Form("model%d",_count));
 
 		cout << "Got Curve" << endl;
@@ -183,12 +183,12 @@ void roofitB(int Opt)
 		tex_Mult->SetTextSize(0.045);
 		tex_Mult->SetLineWidth(2);
 
-		tex_Mult->Draw();
+//		tex_Mult->Draw();
 
 
-		c->SaveAs(Form("Plots/FitResults/JPsiFit_%s_%d.png",Name.Data(),_count));
+		c->SaveAs(Form("Plots/FitResults/JPsiFit_%s_Inc.png",Name.Data()));
 		_count++;
-			
+		
 		JPsiYield->SetBinContent(i+1,yield);
 		JPsiYield->SetBinError(i+1,yieldErr);
 	

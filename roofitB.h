@@ -1,5 +1,5 @@
 #include "TAxis.h"
-#include "uti.h"
+//#include "uti.h"
 #include "RooWorkspace.h"
 #include "RooGlobalFunc.h"
 #include "RooRealVar.h"
@@ -189,7 +189,7 @@ RooFitResult *fit(TString variation, TString pdf, TCanvas* c, RooDataSet* ds,  R
 	//RooRealVar a1(Form("a1%d",_count),"a1",0.1,0.,1.);
 	//RooRealVar a2(Form("a2%d",_count),"a2",0.1,0.,1.);
 	//RooChebychev bkg(Form("bkg%d",_count),"",*mass,RooArgSet(a0,a1,a2));
-	RooRealVar a0(Form("a0%d",_count),"",0.1,-1e4,1e4);
+	RooRealVar a0(Form("a0%d",_count),"",0.1,-1e4,1.0);
 	RooRealVar a1(Form("a1%d",_count),"",0.1,-1e4,1e4);
 	RooRealVar a2(Form("a2%d",_count),"",1e0,-1e4,1e4);
 	//	RooRealVar a3(Form("a3%d",_count),"",1e0,-1e4,1e4);
@@ -274,7 +274,7 @@ RooFitResult *fit(TString variation, TString pdf, TCanvas* c, RooDataSet* ds,  R
 	//	sig = new RooAddPdf(Form("sig%d",_count),"",RooArgList(cball1));
 	//	sig = new RooAddPdf(Form("sig%d",_count),"",cball1);
 
-	model = new RooAddPdf(Form("model%d",_count),"",RooArgList(*sig,bkg),RooArgList(nsig,nbkg));
+	model = new RooAddPdf(Form("model%d",_count),"",RooArgList(*sig,bkg_1st),RooArgList(nsig,nbkg));
 
 	frame->SetMaximum(nsig.getVal()*0.9);
 
@@ -314,8 +314,8 @@ RooFitResult *fit(TString variation, TString pdf, TCanvas* c, RooDataSet* ds,  R
 
 
 	w_val->import(*model);
-//	w_val->import(nsig);
-//	w_val->import(cbmean);
+	w_val->import(nsig);
+	w_val->import(cbmean);
 
 	cout << "nbkg->getVal() = " << nbkg.getVal() << endl;
 	
@@ -672,7 +672,7 @@ RooFitResult *fit(TString variation, TString pdf, TCanvas* c, RooDataSet* ds,  R
 
 	//RooFitResult* fitResult = model->fitTo(*ds,Save(),Minos());
 	//ds->plotOn(frame,Name(Form("ds%d",_count)),Binning(nbinsmasshisto),MarkerSize(1.55),MarkerStyle(20),LineColor(1),LineWidth(4));
-
+/*
 	Double_t Significance =  real_significance;
 	//	Double_t Significance =  yield/TMath::Sqrt(bkgd+yield);
 	int nDigit_Significance = 3;
@@ -685,7 +685,7 @@ RooFitResult *fit(TString variation, TString pdf, TCanvas* c, RooDataSet* ds,  R
 	texSig->SetTextSize(0.03);
 	texSig->SetLineWidth(2);
 
-
+*/
 
 	leg->Draw("same");
 	//texcms->Draw();
@@ -852,7 +852,7 @@ void latex_table(std::string filename, int n_col, int n_lin, std::vector<std::st
 }
 
 
-void validate_fit(RooWorkspace* w)
+void validate_fit(RooWorkspace* w, int Opt)
 {
 	std::cout << "Now Perform Check on Fit" << std::endl;
 	RooRealVar dimuon_mass = *(w->var("dimuon_mass"));
@@ -861,7 +861,7 @@ void validate_fit(RooWorkspace* w)
 
 	//model->fitTo(*data);
 
-	vector<RooRealVar> params;
+	std::vector<RooRealVar> params;
 	params.push_back(*(w->var(Form("nsig%d",_count))));
 	params.push_back(*(w->var(Form("cbmean%d",_count))));
 
@@ -931,7 +931,7 @@ void validate_fit(RooWorkspace* w)
 
 	RooMCStudy* mcstudy = new RooMCStudy(*model, dimuon_mass,  Extended(), FitOptions(Save(kTRUE), PrintEvalErrors(0)));
 
-	mcstudy->generateAndFit(100);
+	mcstudy->generateAndFit(500);
 
 	cout << "DONE Generate and Fit " << endl;
 
@@ -944,11 +944,11 @@ void validate_fit(RooWorkspace* w)
 
 	for(int i = 0; i < params_size; ++i)
 	{
-		framesPull.push_back(mcstudy->plotPull(params.at(i),FrameBins(50),FrameRange(-3,3)));
+		framesPull.push_back(mcstudy->plotPull(params.at(i),FrameBins(20),FrameRange(-3,3)));
 		framesPull[i]->SetTitle("");
-		framesParam.push_back(mcstudy->plotParam(params.at(i),FrameBins(50)));
+		framesParam.push_back(mcstudy->plotParam(params.at(i),FrameBins(20)));
 		framesParam[i]->SetTitle("");
-		framesError.push_back(mcstudy->plotError(params.at(i),FrameBins(50)));
+		framesError.push_back(mcstudy->plotError(params.at(i),FrameBins(20)));
 		framesError[i]->SetTitle("");
 	}
 
@@ -966,8 +966,10 @@ void validate_fit(RooWorkspace* w)
 
 	TCanvas* c_pull = new TCanvas("pulls", "pulls", 900, 800);
 
+	
 	gPad->SetLeftMargin(0.15);
-	//gPad->SetBottomMargin(0.0);
+	gPad->SetBottomMargin(0.04);
+	c_pull->SetBottomMargin(0.04);
 
 
 	for(int i = 0; i < params_size; ++i){
@@ -1058,9 +1060,9 @@ void validate_fit(RooWorkspace* w)
 
 
 
-		c_pull->SaveAs(Form("Plots/Pull/Pull_%s_%d.png",ParName[i].Data(),_count));
-		c_params->SaveAs(Form("Plots/Pull/Par_%s_%d.png",ParName[i].Data(),_count));
-		c_errors->SaveAs(Form("Plots/Pull/Error_%s_%d.png",ParName[i].Data(),_count));
+		c_pull->SaveAs(Form("Plots/Pull/Pull_%s_%d_%d.png",ParName[i].Data(),Opt,_count));
+		c_params->SaveAs(Form("Plots/Pull/Par_%s_%d_%d.png",ParName[i].Data(),Opt,_count));
+		c_errors->SaveAs(Form("Plots/Pull/Error_%s_%d_%d.png",ParName[i].Data(),Opt,_count));
 
 	}
 
