@@ -28,6 +28,9 @@ using std::endl;
 
 void DrawAveR(int Opt, int MultOpt){
 
+
+
+
 	TString FileName;
 
 	if(Opt == 0) FileName = "North";
@@ -124,7 +127,7 @@ void DrawAveR(int Opt, int MultOpt){
 
 
 
-	TH1D * Ratio = JPsiYield->Clone("Ratio");
+	TH1D * Ratio = (TH1D *) JPsiYield->Clone("Ratio");
 	
 	Ratio->Sumw2();
 	Evt_Mult_FVTXN_His->Sumw2();
@@ -148,11 +151,16 @@ void DrawAveR(int Opt, int MultOpt){
 	Ratio->SetMarkerColor(1);
 	Ratio->SetLineColor(1);
 
-
+/*
 
 	const int NBins = 5;
 	double MultBinScale[NBins + 1] = {0,2.0/AverageMB,5.0/AverageMB,8.0/AverageMB,12.0/AverageMB,19.0/AverageMB};
 	double MultBin[NBins + 1] = {0,2.0,5.0,8.0,12.0,19.0};
+*/
+	const int NBins = 10;
+	double MultBinScale[NBins + 1] = {0,1/AverageMB,2/AverageMB,3/AverageMB,4/AverageMB,5/AverageMB,6/AverageMB,8/AverageMB,10/AverageMB,12/AverageMB,19/AverageMB};
+	double MultBin[NBins + 1] = {0,1,2,3,4,5,6,8,10,12,19};
+
 
 	float Value;
 	float ValueErr;
@@ -226,11 +234,17 @@ void DrawAveR(int Opt, int MultOpt){
 	float RErr;
 
 	float CorrFactor;
-	
+	float MultFactor;
+
 	float RFinal;
 	float RErrFinal;
 
 	float BinCenter;
+	
+
+
+	TF1 * MultiFunc = new TF1("MultiFunc","9.83665e-01 + 6.44703e-03 * x + 3.02238e-04 * x * x + 4.83052e-06 * x * x * x * x",0,19);
+
 
 	for(int i = 0; i < NBins; i++){
 		
@@ -240,11 +254,13 @@ void DrawAveR(int Opt, int MultOpt){
 		BinCenter = (MultBin[i] + MultBin[i+1]) * 0.5;
 
 		CorrFactor = TrigBias->Eval(BinCenter);
-		
+		MultFactor = MultiFunc->Eval(BinCenter);
+	
+//		cout << "BinCenter = " << BinCenter << "   MultFactor = " << MultFactor << endl;
 //		cout << "CorrFactor = " << CorrFactor << endl;
 
-		RFinal = R * CorrFactor;
-		RErrFinal = RErr * CorrFactor;
+		RFinal = R * CorrFactor * MultFactor;
+		RErrFinal = RErr * CorrFactor * MultFactor;
 		
 
 		RatioScaledCorr->SetBinContent(i+1,RFinal);
@@ -253,11 +269,47 @@ void DrawAveR(int Opt, int MultOpt){
 
 	c->cd();
 
+
+
 	RatioScaledCorr->Draw("ep");
-	func->Draw("SAME");
 
 	c->SaveAs(Form("FinalPlots/Corr/JPsiRatio_%d_%d.png",Opt,MultOpt));
+	
 
+
+	TF1 * FitFunc = new TF1("FitFunc","[0] * [1] *x",0.6,7);
+	FitFunc->SetParLimits(0,0,2);
+	FitFunc->SetParLimits(1,1.0,1.4);
+	FitFunc->SetLineColor(kGreen);
+	FitFunc->SetLineStyle(5);
+
+
+	RatioScaledCorr->Draw("ep");
+	RatioScaledCorr->Fit(FitFunc,"R");
+
+
+	RatioScaledCorr->Draw("ep");
+	FitFunc->Draw("SAME");
+	func->Draw("SAME");
+
+	float p0 = FitFunc->GetParameter(0);
+	float p1 = FitFunc->GetParameter(1);
+
+	TLegend* leg = new TLegend(0.17,0.60,0.50,0.80,NULL,"brNDC");
+	leg->SetBorderSize(0);
+	leg->SetTextSize(0.040);
+	leg->SetTextFont(42);
+	leg->SetFillStyle(0);
+	leg->SetLineWidth(3);
+	leg->AddEntry(RatioScaledCorr,"PHENIX Data","PL");
+	leg->AddEntry(FitFunc,Form("Fit to Data: y = %.2f + %.2f x",p0,p1),"L");	
+	leg->AddEntry(func,Form("Reference: y = x"),"L");	
+	leg->Draw("same");
+
+
+
+	c->SaveAs(Form("FinalPlots/Final/JPsiRatio_%d_%d.png",Opt,MultOpt));
+	
 
 
 

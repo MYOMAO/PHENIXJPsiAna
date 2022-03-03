@@ -68,10 +68,15 @@ void roofitB(int Opt,int MultOpt)
 
 	ds = new RooDataSet("ds0","",skimtree_new, RooArgSet(*mass, *y, *Evt_Mult_FVTXN, *Evt_Mult_FVTXS, *Evt_Mult_SVX));
 
-
+/*
 	const int NBins = 5;
 	int MultBin[NBins + 1] = {0,2,5,8,12,19};
 	double MultBinHis[NBins + 1] = {0,2,5,8,12,19};
+*/
+
+	const int NBins = 10;
+	int MultBin[NBins + 1] = {0,1,2,3,4,5,6,8,10,12,19};
+	double MultBinHis[NBins + 1] = {0,1,2,3,4,5,6,8,10,12,19};
 
 
 	TH1D * JPsiYield = new TH1D("JPsiYield","",NBins,MultBinHis);

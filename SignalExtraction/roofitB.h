@@ -741,13 +741,15 @@ RooFitResult *fit(TString variation, TString pdf, TCanvas* c, RooDataSet* ds,  R
 
 	mass->setRange("signal",JPSI_MASS-SignalWidth, JPSI_MASS+SignalWidth);
 	RooAbsReal* RangeBakground = bkg.createIntegral(*mass,NormSet(*mass),Range("signal")); 
-	RooAbsReal* RangeSig = sig->createIntegral(*mass,NormSet(*mass),Range("signal")); 
+//	RooAbsReal* RangeSig = sig->createIntegral(*mass,NormSet(*mass),Range("signal")); 
 
 
 
 	//cout << "RangeBakground = " << RangeBakground << endl;
-	yield = nsig.getVal() * RangeSig->getVal();
-	yieldErr = nsig.getError() * RangeSig->getVal();
+//	yield = nsig.getVal() * RangeSig->getVal();
+//	yieldErr = nsig.getError() * RangeSig->getVal();
+
+//	cout << "yield INSIDE = " << yield << "   RangeSig->getVal() = " << RangeSig->getVal() << endl;
 
 	double Calback = RangeBakground->getVal() * nbkg.getVal();
 	double StatSig = yield/sqrt(yield + Calback);
@@ -771,6 +773,24 @@ RooFitResult *fit(TString variation, TString pdf, TCanvas* c, RooDataSet* ds,  R
 
 
 	lat->Draw("SAME");
+
+	//Draw the MassWidth Line
+		
+	
+	TLine * l1 = new TLine(JPSI_MASS-SignalWidth,0,JPSI_MASS-SignalWidth,frame->GetMaximum());
+	l1->SetLineStyle(2);
+	l1->SetLineWidth(2);
+	l1->SetLineColor(kGreen);
+	l1->Draw("SAME");
+
+	
+
+	TLine * l2 = new TLine(JPSI_MASS+SignalWidth,0,JPSI_MASS+SignalWidth,frame->GetMaximum());
+	l2->SetLineStyle(2);
+	l2->SetLineWidth(2);
+	l2->SetLineColor(kGreen);
+	l2->Draw("SAME");
+
 
 	return fitResult;
 
