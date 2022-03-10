@@ -70,6 +70,12 @@ void MUStat(int Opt, int MultOpt){
 	MUStatHis->GetXaxis()->CenterTitle();
 	
 	MUStatHis->Draw("ep");
+
+	TLatex *lat = new TLatex();
+	lat->SetNDC();
+	lat->SetTextSize(0.042);
+	lat->DrawLatex(0.50,0.75,"MU (Dimuon) Sample");
+
 	c->SetLogy();
 	c->SaveAs(Form("MUStatCheck/MUStat_%d_%d.png",Opt,MultOpt));
 

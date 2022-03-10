@@ -71,7 +71,7 @@ Float_t hiBinMin,hiBinMax,centMin,centMax;
 Int_t _count=0;
 RooWorkspace* inputw = new RooWorkspace();
 RooWorkspace* outputw = new RooWorkspace("w");
-RooWorkspace* w_val= new RooWorkspace("w_val");
+RooWorkspace* w_val;
 
 
 Double_t yield;
@@ -89,7 +89,10 @@ Double_t FitWidth2Err;
 
 
 RooAddPdf* model;
-double SignalWidth = 0.20;
+double SignalWidth = 0.40;
+
+TString DirName[2] ={"North","South"};
+TString MultName[3] ={"FVTXN","FVTXS","SVX"};
 
 
 RooFitResult *fit(TString variation, TString pdf, TCanvas* c, RooDataSet* ds,  RooDataHist* dh, RooRealVar* mass, RooPlot* &outframe)
@@ -284,7 +287,10 @@ RooFitResult *fit(TString variation, TString pdf, TCanvas* c, RooDataSet* ds,  R
 	//	sig = new RooAddPdf(Form("sig%d",_count),"",RooArgList(cball1));
 	//	sig = new RooAddPdf(Form("sig%d",_count),"",cball1);
 
+	cout <<"Before model = " << _count << endl;
+
 	model = new RooAddPdf(Form("model%d",_count),"",RooArgList(*sig,bkg),RooArgList(nsig,nbkg));
+	
 
 	frame->SetMaximum(nsig.getVal()*0.9);
 
@@ -736,20 +742,23 @@ RooFitResult *fit(TString variation, TString pdf, TCanvas* c, RooDataSet* ds,  R
 	outframe = frame;
 	outputw->import(*model);
 
+	
 //	float init_mean  = 3.096916;
 //	SignalWidth = 0.2;
 
 	mass->setRange("signal",JPSI_MASS-SignalWidth, JPSI_MASS+SignalWidth);
 	RooAbsReal* RangeBakground = bkg.createIntegral(*mass,NormSet(*mass),Range("signal")); 
-//	RooAbsReal* RangeSig = sig->createIntegral(*mass,NormSet(*mass),Range("signal")); 
+	RooAbsReal* RangeSig = sig->createIntegral(*mass,NormSet(*mass),Range("signal")); 
 
 
+	cout << "RangeSig->getVal() = " << RangeSig->getVal() << endl;
+	cout << "RangeBakground->getVal() = " << RangeBakground->getVal() << endl;
 
 	//cout << "RangeBakground = " << RangeBakground << endl;
-//	yield = nsig.getVal() * RangeSig->getVal();
-//	yieldErr = nsig.getError() * RangeSig->getVal();
+	yield = yield * RangeSig->getVal();
+	yieldErr = yieldErr * RangeSig->getVal();
 
-//	cout << "yield INSIDE = " << yield << "   RangeSig->getVal() = " << RangeSig->getVal() << endl;
+	cout << "yield INSIDE = " << yield << "   RangeSig->getVal() = " << RangeSig->getVal() << endl;
 
 	double Calback = RangeBakground->getVal() * nbkg.getVal();
 	double StatSig = yield/sqrt(yield + Calback);
@@ -781,7 +790,7 @@ RooFitResult *fit(TString variation, TString pdf, TCanvas* c, RooDataSet* ds,  R
 	l1->SetLineStyle(2);
 	l1->SetLineWidth(2);
 	l1->SetLineColor(kGreen);
-	l1->Draw("SAME");
+//	l1->Draw("SAME");
 
 	
 
@@ -789,7 +798,7 @@ RooFitResult *fit(TString variation, TString pdf, TCanvas* c, RooDataSet* ds,  R
 	l2->SetLineStyle(2);
 	l2->SetLineWidth(2);
 	l2->SetLineColor(kGreen);
-	l2->Draw("SAME");
+//	l2->Draw("SAME");
 
 
 	return fitResult;
@@ -898,18 +907,26 @@ void latex_table(std::string filename, int n_col, int n_lin, std::vector<std::st
 }
 
 
-void validate_fit(RooWorkspace* w, int Opt)
+void validate_fit(RooWorkspace* w, int Arg1, int Arg2)
 {
 	std::cout << "Now Perform Check on Fit" << std::endl;
 	RooRealVar dimuon_mass = *(w->var("dimuon_mass"));
 	RooAbsPdf* model  = w->pdf(Form("model%d",_count));
+	//RooAbsPdf* model  = w->pdf("model0");
+
 	//RooDataSet* data = (RooDataSet*) w->data("data");
 
 	//model->fitTo(*data);
 
+
+
+	cout << "_count = " << _count << endl;
+
 	std::vector<RooRealVar> params;
+	params.clear();
 	params.push_back(*(w->var(Form("nsig%d",_count))));
 	params.push_back(*(w->var(Form("cbmean%d",_count))));
+
 
 
 	/*
@@ -973,11 +990,12 @@ void validate_fit(RooWorkspace* w, int Opt)
 
 	int params_size = params.size();
 
+	params_size = 2;
 	cout << "params_size " << params_size << endl;
 
 	RooMCStudy* mcstudy = new RooMCStudy(*model, dimuon_mass,  Extended(), FitOptions(Save(kTRUE), PrintEvalErrors(0)));
 
-	mcstudy->generateAndFit(500);
+	mcstudy->generateAndFit(1000);
 
 	cout << "DONE Generate and Fit " << endl;
 
@@ -1079,7 +1097,7 @@ void validate_fit(RooWorkspace* w, int Opt)
 		h1[i]->GetYaxis()->SetTitle("");
 		h1[i]->Draw("APsame");
 		c_errors->cd();
-
+/*
 		h3[i]->SetTitle("");
 		h3[i]->Draw();
 		c_errors->Update();
@@ -1090,7 +1108,7 @@ void validate_fit(RooWorkspace* w, int Opt)
 		h3[i]->GetYaxis()->SetTitle("");
 		h3[i]->Draw("APsame");
 
-
+*/
 
 		c_params->cd();
 
@@ -1106,9 +1124,9 @@ void validate_fit(RooWorkspace* w, int Opt)
 
 
 
-		c_pull->SaveAs(Form("Plots/Pull/Pull_%s_%d_%d.png",ParName[i].Data(),Opt,_count));
-		c_params->SaveAs(Form("Plots/Pull/Par_%s_%d_%d.png",ParName[i].Data(),Opt,_count));
-		c_errors->SaveAs(Form("Plots/Pull/Error_%s_%d_%d.png",ParName[i].Data(),Opt,_count));
+		c_pull->SaveAs(Form("Plots/Pull/%s_%s/Pull_%s_%d.png",DirName[Arg1].Data(),MultName[Arg2].Data(),ParName[i].Data(),_count));
+		c_params->SaveAs(Form("Plots/Pull/%s_%s/Par_%s_%d.png",DirName[Arg1].Data(),MultName[Arg2].Data(),ParName[i].Data(),_count));
+		c_errors->SaveAs(Form("Plots/Pull/%s_%s/Error_%s_%d.png",DirName[Arg1].Data(),MultName[Arg2].Data(),ParName[i].Data(),_count));
 
 	}
 

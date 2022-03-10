@@ -90,7 +90,7 @@ void roofitB(int Opt,int MultOpt)
 	for(int i=0;i<NBins;i++)
 	{
 		TString Cut;
-
+		w_val= new RooWorkspace("w_val");
 		//		if(Opt==0) Cut = Form("dimuon_rapidity > -999 && Evt_Mult_FVTXN + Evt_Mult_FVTXS >= %d && Evt_Mult_FVTXN + Evt_Mult_FVTXS < %d",MultBin[i],MultBin[i+1]);
 		if(Opt==0 && MultOpt == 0) Cut = Form("dimuon_rapidity > 0  && Evt_Mult_FVTXN >= %d && Evt_Mult_FVTXN < %d",MultBin[i],MultBin[i+1]);
 		if(Opt==0 && MultOpt == 1) Cut = Form("dimuon_rapidity > 0  && Evt_Mult_FVTXS >= %d && Evt_Mult_FVTXS < %d",MultBin[i],MultBin[i+1]);
@@ -130,13 +130,12 @@ void roofitB(int Opt,int MultOpt)
 		RooFitResult* f = fit("", "", c,  ds_cut, dh, mass, frame);
 
 		std::cout << "Now Finall We Validate Our Fits" << std::endl;
-		//	validate_fit(w_val);
+		validate_fit(w_val,Opt,MultOpt);
 		modelcurve = frame->getCurve(Form("model%d",_count));
-
 		cout << "Got Curve" << endl;
 
 		RooRealVar* fitYield = static_cast<RooRealVar*>(f->floatParsFinal().at(f->floatParsFinal().index(Form("nsig%d",_count))));
-		double yield = fitYield->getVal();
+//		double yield = fitYield->getVal();
 
 
 		cout << "Pass Here 8" << endl;
@@ -238,7 +237,8 @@ void roofitB(int Opt,int MultOpt)
 		JPsiWidth2->SetBinContent(i+1,FitWidth2);
 		JPsiWidth2->SetBinError(i+1,FitWidth2Err);
 
-
+	
+		cout << "yield OUTSIDE = " << yield << endl;
 
 	}
 
