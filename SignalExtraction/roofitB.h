@@ -289,8 +289,9 @@ RooFitResult *fit(TString variation, TString pdf, TCanvas* c, RooDataSet* ds,  R
 
 	cout <<"Before model = " << _count << endl;
 
-	model = new RooAddPdf(Form("model%d",_count),"",RooArgList(*sig,bkg),RooArgList(nsig,nbkg));
-	
+//	model = new RooAddPdf(Form("model%d",_count),"",RooArgList(*sig,bkg),RooArgList(nsig,nbkg));
+	model = new RooAddPdf(Form("model%d",_count),"",RooArgList(cball1,bkg),RooArgList(nsig,nbkg));
+
 
 	frame->SetMaximum(nsig.getVal()*0.9);
 

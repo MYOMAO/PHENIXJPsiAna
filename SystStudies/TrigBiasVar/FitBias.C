@@ -28,7 +28,9 @@ using std::endl;
 
 void FitBias(){
 
-
+	gStyle->SetOptStat(0);
+	TCanvas * c = new TCanvas("c","c",600,600);
+	c->cd();
 	const int NFiles = 3;
 
 	TString FileName[NFiles] = {"infiles/Run15pp_BBC_TrigEff_Multi_BBC_600-800kHz.root","infiles/Run15pp_BBC_TrigEff_Multi_BBC_1000-1500kHz.root","infiles/Run15pp_BBC_TrigEff_Multi_BBC_2000-2500kHz.root"};
@@ -48,9 +50,7 @@ void FitBias(){
 	for(int i = 0; i < NFiles; i++){
 
 
-		gStyle->SetOptStat(0);
-		TCanvas * c = new TCanvas("c","c",600,600);
-		c->cd();
+
 
 
 
@@ -63,20 +63,20 @@ void FitBias(){
 		h3SVX[i] = (TH1D *) fin->Get("h3SVX");
 
 		h3FVTXS[i]->GetXaxis()->SetTitle("FVTX_South MB Event Multiplicity");
-		h3FVTXS[i]->GetYaxis()->SetTitle("MB Trigger Bias");
+		h3FVTXS[i]->GetYaxis()->SetTitle("MB Trigger Efficiency #epsilon_{trig}^{MB}");
 		h3FVTXS[i]->GetYaxis()->SetTitleOffset(1.4);
 		h3FVTXS[i]->GetXaxis()->CenterTitle();
 		h3FVTXS[i]->GetYaxis()->CenterTitle();
 
 		h3FVTXN[i]->GetXaxis()->SetTitle("FVTX_North MB Event Multiplicity");
-		h3FVTXN[i]->GetYaxis()->SetTitle("MB Trigger Bias");
+		h3FVTXN[i]->GetYaxis()->SetTitle("MB Trigger Efficiency #epsilon_{trig}^{MB}");
 		h3FVTXN[i]->GetYaxis()->SetTitleOffset(1.4);
 		h3FVTXN[i]->GetXaxis()->CenterTitle();
 		h3FVTXN[i]->GetYaxis()->CenterTitle();
 
 
 		h3SVX[i]->GetXaxis()->SetTitle("SVX MB Event Multiplicity");
-		h3SVX[i]->GetYaxis()->SetTitle("MB Trigger Bias");
+		h3SVX[i]->GetYaxis()->SetTitle("MB Trigger Efficiency #epsilon_{trig}^{MB}");
 		h3SVX[i]->GetYaxis()->SetTitleOffset(1.4);
 		h3SVX[i]->GetXaxis()->CenterTitle();
 		h3SVX[i]->GetYaxis()->CenterTitle();
@@ -299,10 +299,13 @@ void FitBias(){
 
 	TString XName[NFiles] = {"FVTXN MB Event Multiplicity","FVTXS MB Event Multiplicity","SVX MB Event Multiplicity"};
 	TString XNameHis[NFiles] = {"FVTXN.png","FVTXS.png","SVX.png"};
+	TString XNameHisSym[NFiles] = {"FVTXNSym.png","FVTXSSym.png","SVXSym.png"};
+	
 	TString Title[NFiles] = {"MB Trigger Bias Systematics: FVTXN","MB Trigger Bias Systematics: FVTXS","MB Trigger Bias Systematics: SVX"};
 
 	TH1D * TrigBiasSystUp[NFiles];	
 	TH1D * TrigBiasSystDown[NFiles];	
+	TH1D * TrigBiasSystSym[NFiles];	
 
 
 	float XCenter;
@@ -316,6 +319,12 @@ void FitBias(){
 	float FVTXSSystDown;
 	float SVXSystUp;
 	float SVXSystDown;
+
+	float FVTXNSystSym;
+	float FVTXSSystSym;
+	float SVXSystSym;
+
+
 
 
 	for(int i = 0; i < NFiles; i++){
@@ -342,6 +351,19 @@ void FitBias(){
 		TrigBiasSystDown[i]->SetMarkerSize(1);
 		TrigBiasSystDown[i]->SetMarkerColor(kBlue);
 		TrigBiasSystDown[i]->SetLineColor(kBlue);
+
+		TrigBiasSystSym[i] = new TH1D(Form("TrigBiasSystSym_%d",i),"",NBins,MultBin);
+		TrigBiasSystSym[i]->GetXaxis()->SetTitle(XName[i].Data());
+		TrigBiasSystSym[i]->GetYaxis()->SetTitle("MB Trigger Efficiency Systematics (%)");
+		TrigBiasSystSym[i]->GetYaxis()->SetTitleOffset(1.4);
+		TrigBiasSystSym[i]->GetXaxis()->CenterTitle();
+		TrigBiasSystSym[i]->GetYaxis()->CenterTitle();
+		TrigBiasSystSym[i]->SetMarkerStyle(20);
+		TrigBiasSystSym[i]->SetMarkerSize(1);
+		TrigBiasSystSym[i]->SetMarkerColor(kBlack);
+		TrigBiasSystSym[i]->SetLineColor(kBlack);
+		TrigBiasSystSym[i]->SetTitle(Title[i].Data());
+
 
 
 	}
@@ -371,7 +393,10 @@ void FitBias(){
 		SVXSystDown = -TMath::Abs(SVXVar[0] - SVXVar[1])/SVXVar[1] * 100;
 
 		//cout << "FVTXNVar[2] = " << FVTXNVar[2] <<  "      FVTXNVar[1] = " << FVTXNVar[1]  << endl;
-
+			
+		FVTXNSystSym = TMath::Abs(FVTXNVar[2] - FVTXNVar[0])/FVTXNVar[1]/TMath::Sqrt(12) * 100;
+		FVTXSSystSym = TMath::Abs(FVTXSVar[2] - FVTXSVar[0])/FVTXSVar[1]/TMath::Sqrt(12) * 100;
+		SVXSystSym = TMath::Abs(SVXVar[2] - SVXVar[0])/SVXVar[1]/TMath::Sqrt(12) * 100;
 
 		TrigBiasSystUp[0]->SetBinContent(q+1,FVTXNSystUp);
 		TrigBiasSystUp[1]->SetBinContent(q+1,FVTXNSystUp);
@@ -380,6 +405,12 @@ void FitBias(){
 		TrigBiasSystDown[0]->SetBinContent(q+1,FVTXNSystDown);
 		TrigBiasSystDown[1]->SetBinContent(q+1,FVTXNSystDown);
 		TrigBiasSystDown[2]->SetBinContent(q+1,SVXSystDown);
+
+
+		TrigBiasSystSym[0]->SetBinContent(q+1,FVTXNSystSym);
+		TrigBiasSystSym[1]->SetBinContent(q+1,FVTXNSystSym);
+		TrigBiasSystSym[2]->SetBinContent(q+1,SVXSystSym);
+
 
 		TrigBiasSystUp[0]->SetBinError(q+1,0.0001);
 		TrigBiasSystUp[1]->SetBinError(q+1,0.0001);
@@ -390,6 +421,10 @@ void FitBias(){
 		TrigBiasSystDown[2]->SetBinError(q+1,0.0001);
 
 
+		TrigBiasSystSym[0]->SetBinError(q+1,0.0001);
+		TrigBiasSystSym[1]->SetBinError(q+1,0.0001);
+		TrigBiasSystSym[2]->SetBinError(q+1,0.0001);
+
 	}
 
 
@@ -399,7 +434,7 @@ void FitBias(){
 
 		TrigBiasSystUp[i]->SetMaximum(10);
 		TrigBiasSystUp[i]->SetMinimum(-10);
-		
+
 		TrigBiasSystUp[i]->Draw("ep");
 		TrigBiasSystDown[i]->Draw("epSAME");
 
@@ -417,7 +452,44 @@ void FitBias(){
 		c->SaveAs(Form("SystVar/%s",XNameHis[i].Data()));
 	}
 
+	//Symmetrization of Variation//
 
+
+
+
+	for(int i = 0; i < NFiles; i++){
+
+
+		TrigBiasSystSym[i]->SetMaximum(3);
+		TrigBiasSystSym[i]->SetMinimum(0);
+
+		TrigBiasSystSym[i]->Draw("ep");
+
+	
+
+	//	leg->Draw("SAME");
+
+		c->SaveAs(Form("SystVar/%s",XNameHisSym[i].Data()));
+	}
+
+
+
+
+
+	TFile * fout = new TFile("/sphenix/user/zshi/PHENIX/JPsiAnaCodes/SystStudies/MBTrigSyst.root","RECREATE");
+	fout->cd();
+
+
+	for(int i = 0; i < NFiles; i++){
+
+		TrigBiasSystUp[i]->Write();
+		TrigBiasSystDown[i]->Write();
+		TrigBiasSystSym[i]->Write();
+
+	}
+
+
+	fout->Close();
 
 }
 

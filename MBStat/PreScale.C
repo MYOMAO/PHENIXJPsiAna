@@ -57,17 +57,22 @@ void PreScale(int Opt){
 	anaT0->SetBranchAddress("MB1_Scale_Down",&MB1_Scale_Down);
 	anaT0->SetBranchAddress("MB2_Scale_Down",&MB2_Scale_Down);
 	anaT0->SetBranchAddress("Evt_bbcZ",&Evt_bbcZ);
-	
+
 	anaT0->SetBranchAddress("Evt_Mult_FVTXN",&Evt_Mult_FVTXN);
 	anaT0->SetBranchAddress("Evt_Mult_FVTXS",&Evt_Mult_FVTXS);
 	anaT0->SetBranchAddress("Evt_Mult_SVX",&Evt_Mult_SVX);
 
 
 
+	/*
+	   const int NBins = 5;
+	   int MultBin[NBins + 1] = {0,2,5,8,12,19};
+	   double MultBinHis[NBins + 1] = {0,2,5,8,12,19};
+	   */
 
-	const int NBins = 5;
-	int MultBin[NBins + 1] = {0,2,5,8,12,19};
-	double MultBinHis[NBins + 1] = {0,2,5,8,12,19};
+	const int NBins = 10;
+	int MultBin[NBins + 1] = {0,1,2,3,4,5,6,8,10,12,19};
+	double MultBinHis[NBins + 1] = {0,1,2,3,4,5,6,8,10,12,19};
 
 	TH1D * Evt_Mult_FVTXN_His = new TH1D("Evt_Mult_FVTXN_His","",NBins,MultBinHis);
 	TH1D * Evt_Mult_FVTXS_His = new TH1D("Evt_Mult_FVTXS_His","",NBins,MultBinHis);
@@ -78,7 +83,7 @@ void PreScale(int Opt){
 	for(int i = 0; i < NEvents; i++){
 
 		if(i%1000000 == 0)	cout << "Now Working on " << i << endl;
-	
+
 		anaT0->GetEntry(i);
 
 		//cout << "Evt_bbcZ = " << Evt_bbcZ << "   abs(Evt_bbcZ)  = " << abs(Evt_bbcZ)  << endl;
@@ -87,7 +92,7 @@ void PreScale(int Opt){
 			Evt_Mult_FVTXN_His->Fill(Evt_Mult_FVTXN,MB2_Scale_Down + 1);
 			Evt_Mult_FVTXS_His->Fill(Evt_Mult_FVTXS,MB2_Scale_Down + 1);
 			Evt_Mult_SVX_His->Fill(Evt_Mult_SVX,MB2_Scale_Down + 1);
-		
+
 		}
 
 

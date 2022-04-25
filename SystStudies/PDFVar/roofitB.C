@@ -14,7 +14,7 @@ float JPsiMass = 3.096916;
 
 void roofitB(int Opt,int MultOpt, int SigVar, int BackVar)
 {
-
+	//ROOT::Math::MinimizerOptions::SetDefaultStrategy(2);
 	TString FolderName;
 
 	if(SigVar == 0 && BackVar == 0){
@@ -95,11 +95,14 @@ void roofitB(int Opt,int MultOpt, int SigVar, int BackVar)
 	int MultBin[NBins + 1] = {0,2,5,8,12,19};
 	double MultBinHis[NBins + 1] = {0,2,5,8,12,19};
 */
-
+/*
 	const int NBins = 10;
 	int MultBin[NBins + 1] = {0,1,2,3,4,5,6,8,10,12,19};
 	double MultBinHis[NBins + 1] = {0,1,2,3,4,5,6,8,10,12,19};
-
+*/
+	        const int NBins = 1;
+        int MultBin[NBins + 1] = {0,20};
+        double MultBinHis[NBins + 1] = {0,20};
 
 	TH1D * JPsiYield = new TH1D("JPsiYield","",NBins,MultBinHis);
 	TH1D * JPsiMean = new TH1D("JPsiMean","",NBins,MultBinHis);

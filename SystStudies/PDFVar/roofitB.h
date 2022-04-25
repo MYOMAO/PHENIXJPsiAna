@@ -161,7 +161,7 @@ RooFitResult *fit(TString variation, TString pdf, TCanvas* c, RooDataSet* ds,  R
 	RooRealVar cbsigma1("cbsigma1", "cbsigma1" , 0.4, 0.0, 0.8);
 	RooRealVar cbsigma2("cbsigma2", "cbsigma2" , 0.4, 0.0, 0.8) ;
 
-	RooRealVar n1("n1","", 5.1,0,100);
+	RooRealVar n1("n1","", 5,90.0,200);
 	RooRealVar n2("n2","", 5.1,0,100);
 	
 	RooRealVar alpha1("alpha1","", 1.3,0,10);
@@ -283,8 +283,9 @@ RooFitResult *fit(TString variation, TString pdf, TCanvas* c, RooDataSet* ds,  R
 
 
 
-	if(SigVar == 1) sig1frac.setVal(0.0);
+//	if(SigVar == 1) sig1frac.setVal(0.0);
 
+	
 
 	sig = new RooAddPdf(Form("sig%d",_count),"",RooArgList(cball1,cball2),sig1frac);
 
@@ -293,9 +294,10 @@ RooFitResult *fit(TString variation, TString pdf, TCanvas* c, RooDataSet* ds,  R
 
 	cout <<"Before model = " << _count << endl;
 
-	model = new RooAddPdf(Form("model%d",_count),"",RooArgList(*sig,bkg),RooArgList(nsig,nbkg));
-
+	if(SigVar == 0 && BackVar == 0) model = new RooAddPdf(Form("model%d",_count),"",RooArgList(*sig,bkg),RooArgList(nsig,nbkg));
 	if(BackVar == 1) model = new RooAddPdf(Form("model%d",_count),"",RooArgList(*sig,bkg_1st),RooArgList(nsig,nbkg));;
+	if(SigVar == 1) model = new RooAddPdf(Form("model%d",_count),"",RooArgList(cball1,bkg),RooArgList(nsig,nbkg));
+
 
 	frame->SetMaximum(nsig.getVal()*0.9);
 
@@ -319,6 +321,7 @@ RooFitResult *fit(TString variation, TString pdf, TCanvas* c, RooDataSet* ds,  R
 
 	RooFitResult* fitResult = model->fitTo(*ds,Save(), Minos(),  RooFit::PrintLevel(0) , Extended(kTRUE));
 	//RooFitResult* fitResult = model->fitTo(*ds,Save(), Minos() , Extended(kTRUE),Range(5.34,5.40));
+ 	//RooFitResult* fitResult = model->fitTo(*ds,Minimizer("Minuit2","migrad"));
 
 
 	
@@ -420,16 +423,16 @@ RooFitResult *fit(TString variation, TString pdf, TCanvas* c, RooDataSet* ds,  R
 
 	model->plotOn(frame,Name(Form("bkg%d",_count)),Components(bkg),Normalization(1.0,RooAbsReal::RelativeExpected),Precision(1e-6),DrawOption("L"),LineStyle(7),LineColor(4),LineWidth(4));
 
-	if(pdf!="1gauss"){
+	if(SigVar != 1){
 		model->plotOn(frame,Name(Form("sig%d",_count)),Components(*sig),Normalization(1.0,RooAbsReal::RelativeExpected),Precision(1e-6),DrawOption("L"),FillStyle(3002),FillColor(kOrange-3),LineStyle(7),LineColor(kOrange-3),LineWidth(4));
 		std::cout<<"GETS hERE not 1gauss?"<<std::endl;
 		model->plotOn(frame,Name(Form("sigF%d",_count)),Components(*sig),Normalization(1.0,RooAbsReal::RelativeExpected),Precision(1e-6),DrawOption("F"),FillStyle(3002),FillColor(kOrange-3),LineStyle(7),LineColor(kOrange-3),LineWidth(4));
 		std::cout<<"GETS hERE not 1gauss?"<<std::endl;
 	}
 	else{
-		model->plotOn(frame,Name(Form("sig%d",_count)),Components(sig1),Normalization(1.0,RooAbsReal::RelativeExpected),Precision(1e-6),DrawOption("L"),FillStyle(3002),FillColor(kOrange-3),LineStyle(7),LineColor(kOrange-3),LineWidth(4));
-		std::cout<<"GETS hERE else?"<<std::endl;
-		model->plotOn(frame,Name(Form("sigF%d",_count)),Components(sig1),Normalization(1.0,RooAbsReal::RelativeExpected),Precision(1e-6),DrawOption("F"),FillStyle(3002),FillColor(kOrange-3),LineStyle(7),LineColor(kOrange-3),LineWidth(4));
+		model->plotOn(frame,Name(Form("sig%d",_count)),Components(cball1),Normalization(1.0,RooAbsReal::RelativeExpected),Precision(1e-6),DrawOption("L"),FillStyle(3002),FillColor(kOrange-3),LineStyle(7),LineColor(kOrange-3),LineWidth(4));
+		std::cout<<"GETS hERE not 1gauss?"<<std::endl;
+		model->plotOn(frame,Name(Form("sigF%d",_count)),Components(cball1),Normalization(1.0,RooAbsReal::RelativeExpected),Precision(1e-6),DrawOption("F"),FillStyle(3002),FillColor(kOrange-3),LineStyle(7),LineColor(kOrange-3),LineWidth(4));
 		std::cout<<"GETS hERE else?"<<std::endl;
 	}
 	//model->plotOn(frame,Name(Form("sig_2%d",_count)),Components(sig1),Normalization(1.0,RooAbsReal::RelativeExpected),Precision(1e-6),DrawOption("L"),FillStyle(3002),FillColor(kGreen-3),LineStyle(7),LineColor(kGreen-3),LineWidth(4));
